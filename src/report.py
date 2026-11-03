@@ -26,6 +26,8 @@ if _orig_read is not None:
 
     mimetypes.MimeTypes.read_windows_registry = _safe_read_windows_registry  # type: ignore[assignment]
 
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np

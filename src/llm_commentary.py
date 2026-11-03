@@ -9,11 +9,30 @@ from __future__ import annotations
 
 import logging
 import os
+from pathlib import Path
 from typing import Optional
 
 from src.backtester import BacktestResult
 
 logger = logging.getLogger(__name__)
+
+
+def _load_env_file() -> None:
+    """Manually parse .env file if present without requiring extra dependencies."""
+    env_file = Path(".env")
+    if env_file.exists():
+        try:
+            with open(env_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip("'\"")
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+        except Exception:
+            pass
 
 
 def build_quant_prompt(result: BacktestResult) -> str:
@@ -121,7 +140,7 @@ def generate_llm_commentary(
     result : BacktestResult
         Completed backtest simulation result object.
     api_key : Optional[str]
-        API key for Gemini or OpenAI. If None, checks GEMINI_API_KEY and OPENAI_API_KEY env vars.
+        API key for Gemini or OpenAI. If None, checks GEMINI_API_KEY and OPENAI_API_KEY env vars/secrets.
     provider : str
         'auto', 'gemini', 'openai', or 'fallback'.
     model : Optional[str]
@@ -135,24 +154,47 @@ def generate_llm_commentary(
     if provider == "fallback":
         return generate_fallback_commentary(result)
 
+    _load_env_file()
     prompt = build_quant_prompt(result)
 
     # 1. Resolve Provider and Key
     gemini_key = api_key if provider == "gemini" else (api_key or os.environ.get("GEMINI_API_KEY"))
     openai_key = api_key if provider == "openai" else (api_key or os.environ.get("OPENAI_API_KEY"))
 
+    # Also check Streamlit secrets if running in Streamlit
+    if not gemini_key:
+        try:
+            import streamlit as st
+            if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
+                gemini_key = str(st.secrets["GEMINI_API_KEY"])
+        except Exception:
+            pass
+
+    if not openai_key:
+        try:
+            import streamlit as st
+            if hasattr(st, "secrets") and "OPENAI_API_KEY" in st.secrets:
+                openai_key = str(st.secrets["OPENAI_API_KEY"])
+        except Exception:
+            pass
+
     # Try Gemini First
     if provider in ["auto", "gemini"] and gemini_key:
         try:
             from google import genai
             client = genai.Client(api_key=gemini_key)
-            target_model = model or "gemini-2.5-flash"
-            response = client.models.generate_content(
-                model=target_model,
-                contents=prompt,
-            )
-            if response.text:
-                return response.text.strip()
+            candidates = [model] if model else ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+            for target_model in candidates:
+                try:
+                    response = client.models.generate_content(
+                        model=target_model,
+                        contents=prompt,
+                    )
+                    if response.text:
+                        return response.text.strip()
+                except Exception as model_err:
+                    logger.warning(f"Gemini model {target_model} failed ({model_err}). Trying next candidate...")
+                    continue
         except Exception as e:
             logger.warning(f"Gemini API commentary generation failed: {e}. Attempting fallback...")
             if provider == "gemini":

@@ -2,7 +2,8 @@
 
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/pytest-30%20passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/pytest-35%20passed-brightgreen.svg)]()
+[![AI Analysis](https://img.shields.io/badge/AI-Gemini%20%7C%20OpenAI-purple.svg)]()
 [![Dashboard](https://img.shields.io/badge/UI-Streamlit%20%2B%20Plotly-red.svg)]()
 [![Market](https://img.shields.io/badge/Market-NSE%20India%20(Equities)-orange.svg)]()
 
@@ -43,7 +44,8 @@ nse-backtester/
 │   ├── portfolio.py            # Position sizing, single-stock caps (15%), cash buffers (5%)
 │   ├── backtester.py           # Core vectorised simulation engine with execution lag & friction
 │   ├── metrics.py              # Purely functional: CAGR, Sharpe, Sortino, MDD, Calmar, Alpha, Beta
-│   └── report.py               # Multi-tab styled openpyxl Excel workbooks & publication Matplotlib charts
+│   ├── llm_commentary.py       # Gemini & OpenAI performance commentary with fallback engine
+│   └── report.py               # Multi-tab styled openpyxl Excel workbooks with embedded AI commentary
 ├── tests/
 │   ├── __init__.py
 │   ├── conftest.py             # Shared synthetic price and benchmark fixtures
@@ -53,7 +55,8 @@ nse-backtester/
 │   ├── test_metrics.py         # Mathematical invariant checks (100% CAGR doubling, zero-vol)
 │   ├── test_portfolio.py       # Single-stock capping and iterative redistribution
 │   ├── test_report.py          # End-to-end Excel and visualization export validation
-│   └── test_ui.py              # Smoke tests for plot builders and state serialization
+│   ├── test_ui.py              # Smoke tests for plot builders and state serialization
+│   └── test_llm.py             # Prompt synthesis and multi-provider commentary validation
 ├── notebooks/
 │   └── demo.ipynb              # Visual walkthrough comparing Momentum vs Mean Reversion vs Nifty 50
 ├── reports/                    # Generated Excel reports (.xlsx) and publication charts (.png)

@@ -8,6 +8,7 @@ from ui.components import (
     render_header_banner,
     render_info_popover,
     render_kpi_ribbon,
+    render_llm_commentary_card,
     render_monthly_matrix_heatmap,
     render_performance_table_component,
 )
@@ -25,6 +26,7 @@ __all__ = [
     "render_header_banner",
     "render_info_popover",
     "render_kpi_ribbon",
+    "render_llm_commentary_card",
     "render_monthly_matrix_heatmap",
     "render_performance_table_component",
     "create_allocation_area_chart",

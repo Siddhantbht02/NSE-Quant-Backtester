@@ -38,6 +38,7 @@ from src.metrics import (
     generate_performance_table,
 )
 from src.report import generate_excel_report, plot_performance
+from src.llm_commentary import generate_llm_commentary, build_quant_prompt
 
 __all__ = [
     "DataLoader",
@@ -61,4 +62,6 @@ __all__ = [
     "generate_performance_table",
     "generate_excel_report",
     "plot_performance",
+    "generate_llm_commentary",
+    "build_quant_prompt",
 ]

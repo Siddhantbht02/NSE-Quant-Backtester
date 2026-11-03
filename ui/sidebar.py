@@ -32,6 +32,8 @@ class SidebarConfig:
     max_weight: float
     cash_buffer: float
     force_reload: bool
+    llm_provider: str = "auto"
+    llm_api_key: str = ""
 
 
 def render_sidebar() -> Tuple[SidebarConfig, bool]:
@@ -305,7 +307,30 @@ def render_sidebar() -> Tuple[SidebarConfig, bool]:
     )
 
     # -------------------------------------------------------------
-    # 6. Action Button
+    # -------------------------------------------------------------
+    # 6. AI Performance Teardown Settings
+    # -------------------------------------------------------------
+    with st.sidebar.expander("🤖 AI Commentary Settings", expanded=False):
+        llm_provider = st.selectbox(
+            "AI Provider",
+            options=["auto", "gemini", "openai", "fallback"],
+            format_func=lambda x: {
+                "auto": "⚡ Auto (Gemini / OpenAI / Rule-Engine)",
+                "gemini": "✨ Google Gemini (google-genai)",
+                "openai": "🧠 OpenAI (GPT-4o-mini)",
+                "fallback": "📊 Rule-Based Quant Engine",
+            }.get(x, x),
+            help="Select the AI engine to generate qualitative performance analysis.",
+        )
+        llm_api_key = st.text_input(
+            "API Key (Optional)",
+            value="",
+            type="password",
+            help="Enter your Gemini or OpenAI API key. If left blank, reads GEMINI_API_KEY/OPENAI_API_KEY env vars or uses the algorithmic engine.",
+        )
+
+    # -------------------------------------------------------------
+    # 7. Action Button
     # -------------------------------------------------------------
     st.sidebar.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
     run_btn = st.sidebar.button("🚀 Run Backtest Simulation", type="primary", use_container_width=True)
@@ -327,6 +352,8 @@ def render_sidebar() -> Tuple[SidebarConfig, bool]:
         max_weight=max_weight_pct / 100.0,
         cash_buffer=cash_buffer_pct / 100.0,
         force_reload=force_reload,
+        llm_provider=llm_provider,
+        llm_api_key=llm_api_key,
     )
 
     return config, run_btn

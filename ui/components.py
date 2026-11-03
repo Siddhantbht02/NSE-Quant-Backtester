@@ -466,3 +466,23 @@ def render_monthly_matrix_heatmap(returns: pd.Series) -> None:
             st.markdown(f"<span style='color:#CBD5E1'>Worst Month:</span> <b style='color:#F87171'>{worst_m*100:+.2f}%</b>", unsafe_allow_html=True)
         with mcol4:
             st.markdown(f"<span style='color:#CBD5E1'>Median Monthly:</span> <b style='color:#38BDF8'>{np.median(clean_m)*100:+.2f}%</b>", unsafe_allow_html=True)
+
+
+def render_llm_commentary_card(commentary: str) -> None:
+    """Render an institutional-grade card displaying AI performance commentary."""
+    st.markdown(
+        """
+        <div style="background-color: #111827; border: 1px solid #1E293B; border-radius: 8px; padding: 18px 22px; margin: 14px 0 18px 0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #1F2937; padding-bottom: 8px;">
+                <span style="color: #38BDF8; font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em;">
+                    🤖 Institutional Quantitative Performance Teardown
+                </span>
+                <span style="background-color: rgba(56, 189, 248, 0.15); color: #38BDF8; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                    AI Analysis Engine
+                </span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown(commentary)

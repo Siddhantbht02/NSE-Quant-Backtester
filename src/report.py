@@ -84,6 +84,7 @@ def compute_monthly_returns_matrix(daily_returns: pd.Series) -> pd.DataFrame:
 def generate_excel_report(
     result: BacktestResult,
     output_path: Union[str, Path] = "reports/backtest_report.xlsx",
+    commentary: Optional[str] = None,
 ) -> Path:
     """Generate professional, multi-tab styled Excel report using openpyxl.
 
@@ -181,6 +182,38 @@ def generate_excel_report(
                 ws_exec.cell(row=curr_row, column=col_idx).alignment = Alignment(horizontal="right")
 
         curr_row += 1
+
+    # Optional LLM Commentary Section
+    if commentary is None:
+        try:
+            from src.llm_commentary import generate_llm_commentary
+            commentary = generate_llm_commentary(result)
+        except Exception as e:
+            logger.warning(f"Failed to auto-generate LLM commentary for Excel report: {e}")
+            commentary = None
+
+    if commentary:
+        comm_title_row = curr_row + 2
+        ws_exec.cell(row=comm_title_row, column=2, value="LLM QUANTITATIVE PERFORMANCE COMMENTARY").font = navy_bold
+
+        comm_box_fill = PatternFill(start_color="F8F9FA", end_color="F8F9FA", fill_type="solid")
+        comm_text_font = Font(name="Calibri", size=10, color="262626")
+
+        # Clean markdown headers for clean Excel display
+        clean_lines = [line.strip() for line in commentary.splitlines() if not line.startswith("### 🤖")]
+        comm_content = "\n".join(clean_lines).strip()
+
+        comm_start_row = comm_title_row + 1
+        comm_end_row = comm_start_row + 14
+        ws_exec.merge_cells(start_row=comm_start_row, start_column=2, end_row=comm_end_row, end_column=5)
+        top_left_cell = ws_exec.cell(row=comm_start_row, column=2, value=comm_content)
+        top_left_cell.font = comm_text_font
+        top_left_cell.alignment = Alignment(vertical="top", wrap_text=True)
+        top_left_cell.fill = comm_box_fill
+
+        for r_idx in range(comm_start_row, comm_end_row + 1):
+            for c_idx in range(2, 6):
+                ws_exec.cell(row=r_idx, column=c_idx).border = thin_border
 
     # Auto-adjust column widths
     ws_exec.column_dimensions["B"].width = 28

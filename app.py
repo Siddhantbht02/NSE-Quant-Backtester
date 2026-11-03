@@ -15,6 +15,7 @@ import streamlit as st
 from src.backtester import Backtester, BacktestResult
 from src.data_loader import DataLoader
 from src.portfolio import PortfolioManager
+from src.llm_commentary import generate_llm_commentary
 from src.report import generate_excel_report, plot_performance
 from src.strategy import MeanReversionStrategy, MomentumStrategy
 from ui import (
@@ -27,6 +28,7 @@ from ui import (
     render_header_banner,
     render_info_popover,
     render_kpi_ribbon,
+    render_llm_commentary_card,
     render_monthly_matrix_heatmap,
     render_performance_table_component,
     render_sidebar,
@@ -253,6 +255,27 @@ if current_result is not None:
 
         render_monthly_matrix_heatmap(hist["net_return"])
 
+        st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
+
+        # 🤖 Institutional LLM Commentary Section
+        col_chdr, col_cbtn = st.columns([5, 2])
+        with col_chdr:
+            st.markdown("### 🤖 Institutional AI Performance Teardown")
+        with col_cbtn:
+            refresh_ai = st.button("🔄 Regenerate AI Teardown", help="Re-invoke AI analysis engine for this strategy.")
+
+        commentary_key = f"commentary_{current_result.strategy_name}"
+        if commentary_key not in st.session_state or refresh_ai or run_clicked:
+            with st.spinner("🤖 Synthesizing quantitative performance commentary..."):
+                ai_text = generate_llm_commentary(
+                    current_result,
+                    api_key=config.llm_api_key if config.llm_api_key else None,
+                    provider=config.llm_provider,
+                )
+                st.session_state[commentary_key] = ai_text
+
+        render_llm_commentary_card(st.session_state[commentary_key])
+
         # Quantitative Bias Defense Note
         st.markdown(
             f"""
@@ -343,7 +366,8 @@ if current_result is not None:
             or st.session_state.get("cached_export_name") != current_result.strategy_name
             or run_clicked
         ):
-            generate_excel_report(current_result, output_path=excel_out_path)
+            comm_text = st.session_state.get(f"commentary_{current_result.strategy_name}", None)
+            generate_excel_report(current_result, output_path=excel_out_path, commentary=comm_text)
             plot_performance(current_result, output_path=chart_out_path)
             st.session_state["cached_export_name"] = current_result.strategy_name
 

@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nse-backtester"
+version = "0.1.0"
+description = "Production-Grade Quantitative Backtesting Framework for NSE (Indian Equities)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Quantitative Research Team" }
+]
+keywords = [
+    "quantitative-finance",
+    "backtesting",
+    "nse",
+    "indian-equities",
+    "momentum",
+    "mean-reversion",
+    "portfolio-optimization",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+dependencies = [
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "pyarrow>=12.0.0",
+    "scipy>=1.10.0",
+    "matplotlib>=3.7.0",
+    "yfinance>=0.2.30",
+    "openpyxl>=3.1.0",
+    "tabulate>=0.9.0",
+    "streamlit>=1.35.0",
+    "plotly>=5.20.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.3.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "ruff>=0.0.260",
+    "mypy>=1.2.0",
+]
+notebooks = [
+    "jupyter>=1.0.0",
+    "ipykernel>=6.20.0",
+]
+
+[project.scripts]
+nse-backtester = "main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*", "tests*", "ui*"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers"
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311"]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4"]
+ignore = ["E501"]
+
